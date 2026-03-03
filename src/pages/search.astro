@@ -1,0 +1,86 @@
+---
+export const prerender = false;
+
+import puppeteer from "puppeteer";
+
+const BOOK_UPSTAIRS = "Book Upstairs";
+const CHAPTERS = "Chapters Bookstore";
+
+const results = {
+  [BOOK_UPSTAIRS]: {
+    title: "",
+    href: "",
+  },
+  [CHAPTERS]: {
+    title: "",
+    href: "",
+  },
+};
+
+if (Astro.request.method === "POST") {
+  const data = await Astro.request.formData();
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+
+  // Book Upstairs
+  results[BOOK_UPSTAIRS] = await (async () => {
+    await page.goto(`https://booksupstairs.ie/?s=${data.get("search")}`);
+
+    const productTitleElement = await page.$(
+      ".book_row_container .book_row_details_container .h5",
+    );
+
+    const productTitle =
+      (await productTitleElement?.evaluate((el) => el.textContent)) ?? "";
+
+    const productLinkElement = await page.$(".book_row_container a");
+
+    const productLinkHref =
+      (await productLinkElement?.evaluate(
+        (el) => el.attributes.getNamedItem("href")?.value,
+      )) ?? "";
+
+    return {
+      title: productTitle,
+      href: productLinkHref,
+    };
+  })();
+
+  // Chapters
+  results[CHAPTERS] = await (async () => {
+    await page.goto(
+      `https://chaptersbookstore.com/search?q=${data.get("search")}`,
+    );
+
+    await page.locator("#shopify-pc__banner__btn-decline").click();
+
+    await page.waitForSelector("h3.product-title");
+
+    const productTitleElement = await page.$("h3.product-title");
+
+    const productTitle =
+      (await productTitleElement?.evaluate((el) => el.textContent)) ?? "";
+
+    const productLinkElement = await page.$("h3.product-title a");
+
+    const productLinkHref =
+      (await productLinkElement?.evaluate(
+        (el) => el.attributes.getNamedItem("href")?.value,
+      )) ?? "";
+
+    return {
+      title: productTitle,
+      href: productLinkHref,
+    };
+  })();
+
+  await browser.close();
+}
+---
+
+<h1>{BOOK_UPSTAIRS}</h1>
+<a href={results[BOOK_UPSTAIRS].href}>{results[BOOK_UPSTAIRS].title}</a>
+<h1>{CHAPTERS}</h1>
+<a href={`https://chaptersbookstore.com${results[CHAPTERS].href}`}
+  >{results[BOOK_UPSTAIRS].title}</a
+>
