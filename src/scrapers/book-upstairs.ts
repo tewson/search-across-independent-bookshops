@@ -17,6 +17,10 @@ export default async function bookUpstairs(page: Page, searchQuery: string) {
       (el) => el.attributes.getNamedItem("href")?.value,
     )) ?? "";
 
+  if (!productTitle || !productLinkHref) {
+    return undefined;
+  }
+
   return {
     title: productTitle,
     href: productLinkHref,

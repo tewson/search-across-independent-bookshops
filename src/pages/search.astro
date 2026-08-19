@@ -8,7 +8,16 @@ import chapters from "../scrapers/chapters";
 const BOOK_UPSTAIRS = "Book Upstairs";
 const CHAPTERS = "Chapters Bookstore";
 
-const results = {
+interface Results {
+  [store: string]:
+    | {
+        title: string;
+        href: string;
+      }
+    | undefined;
+}
+
+const results: Results = {
   [BOOK_UPSTAIRS]: {
     title: "",
     href: "",
@@ -39,8 +48,21 @@ if (Astro.request.method === "POST") {
 ---
 
 <h1>{BOOK_UPSTAIRS}</h1>
-<a href={results[BOOK_UPSTAIRS].href}>{results[BOOK_UPSTAIRS].title}</a>
+{
+  results[BOOK_UPSTAIRS] ? (
+    <a href={results[BOOK_UPSTAIRS].href}>{results[BOOK_UPSTAIRS].title}</a>
+  ) : (
+    <div>Not found</div>
+  )
+}
+
 <h1>{CHAPTERS}</h1>
-<a href={`https://chaptersbookstore.com${results[CHAPTERS].href}`}
-  >{results[CHAPTERS].title}</a
->
+{
+  results[CHAPTERS] ? (
+    <a href={`https://chaptersbookstore.com${results[CHAPTERS].href}`}>
+      {results[CHAPTERS].title}
+    </a>
+  ) : (
+    <div>Not found</div>
+  )
+}

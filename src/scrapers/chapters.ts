@@ -5,8 +5,6 @@ export default async function chapters(page: Page, searchQuery: string) {
 
   await page.locator("#shopify-pc__banner__btn-decline").click();
 
-  await page.waitForSelector("h3.product-title");
-
   const productTitleElement = await page.$("h3.product-title");
 
   const productTitle =
@@ -18,6 +16,10 @@ export default async function chapters(page: Page, searchQuery: string) {
     (await productLinkElement?.evaluate(
       (el) => el.attributes.getNamedItem("href")?.value,
     )) ?? "";
+
+  if (!productTitle || !productLinkHref) {
+    return undefined;
+  }
 
   return {
     title: productTitle,
