@@ -4,9 +4,11 @@ export const prerender = false;
 import puppeteer from "puppeteer";
 import bookUpstairs from "../scrapers/book-upstairs";
 import chapters from "../scrapers/chapters";
+import companyOfBooks from "../scrapers/company-of-books";
 
 const BOOK_UPSTAIRS = "Book Upstairs";
 const CHAPTERS = "Chapters Bookstore";
+const COMPANY_OF_BOOKS = "Company of Books";
 
 interface Results {
   [store: string]:
@@ -17,16 +19,7 @@ interface Results {
     | undefined;
 }
 
-const results: Results = {
-  [BOOK_UPSTAIRS]: {
-    title: "",
-    href: "",
-  },
-  [CHAPTERS]: {
-    title: "",
-    href: "",
-  },
-};
+const results: Results = {};
 
 if (Astro.request.method === "POST") {
   const data = await Astro.request.formData();
@@ -41,6 +34,9 @@ if (Astro.request.method === "POST") {
 
     // Chapters
     results[CHAPTERS] = await chapters(page, searchQuery);
+
+    // Company of Books
+    results[COMPANY_OF_BOOKS] = await companyOfBooks(page, searchQuery);
   }
 
   await browser.close();
@@ -63,6 +59,17 @@ if (Astro.request.method === "POST") {
   results[CHAPTERS] ? (
     <a href={`https://chaptersbookstore.com${results[CHAPTERS].href}`}>
       {results[CHAPTERS].title}
+    </a>
+  ) : (
+    <div>Not found</div>
+  )
+}
+
+<h1>{COMPANY_OF_BOOKS}</h1>
+{
+  results[COMPANY_OF_BOOKS] ? (
+    <a href={`https://thecompanyofbooks.ie${results[COMPANY_OF_BOOKS].href}`}>
+      {results[COMPANY_OF_BOOKS].title}
     </a>
   ) : (
     <div>Not found</div>
