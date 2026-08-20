@@ -7,7 +7,7 @@ export default async function companyOfBooks(page: Page, searchQuery: string) {
 
   try {
     // Wait for client-side rendering
-    await page.waitForSelector(".page-title__name", { timeout: 5000 });
+    await page.waitForSelector(".page-title__name", { timeout: 10000 });
 
     const productTitleElement = await page.$(".grid-product__title-inner");
 
