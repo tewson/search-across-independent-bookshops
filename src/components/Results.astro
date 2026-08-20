@@ -1,0 +1,24 @@
+---
+interface Props {
+  results: {
+    title: string;
+    href: string;
+  }[];
+}
+
+const { results } = Astro.props;
+---
+
+{
+  results.length > 0 ? (
+    <ul>
+      {results.map((result) => (
+        <li>
+          <a href={result.href}>{result.title}</a>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <div>Not found</div>
+  )
+}

@@ -5,24 +5,21 @@ export default async function chapters(page: Page, searchQuery: string) {
 
   await page.locator("#shopify-pc__banner__btn-decline").click();
 
-  const productTitleElement = await page.$("h3.product-title");
+  const results = await page.$$eval("h3.product-title", (productTitles) => {
+    return productTitles
+      .map((productTitleElement) => {
+        const title = productTitleElement.textContent;
+        const href =
+          productTitleElement.querySelector("a")?.getAttribute("href") ?? "";
+        return { title, href };
+      })
+      .filter((rawResult) => rawResult.title && rawResult.href)
+      .slice(0, 10)
+      .map((result) => ({
+        title: result.title,
+        href: `https://chaptersbookstore.com${result.href}`,
+      }));
+  });
 
-  const productTitle =
-    (await productTitleElement?.evaluate((el) => el.textContent)) ?? "";
-
-  const productLinkElement = await page.$("h3.product-title a");
-
-  const productLinkHref =
-    (await productLinkElement?.evaluate(
-      (el) => el.attributes.getNamedItem("href")?.value,
-    )) ?? "";
-
-  if (!productTitle || !productLinkHref) {
-    return undefined;
-  }
-
-  return {
-    title: productTitle,
-    href: productLinkHref,
-  };
+  return results;
 }

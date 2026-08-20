@@ -6,17 +6,17 @@ import bookUpstairs from "../scrapers/book-upstairs";
 import chapters from "../scrapers/chapters";
 import companyOfBooks from "../scrapers/company-of-books";
 
+import Results from "../components/Results.astro";
+
 const BOOK_UPSTAIRS = "Book Upstairs";
 const CHAPTERS = "Chapters Bookstore";
 const COMPANY_OF_BOOKS = "Company of Books";
 
 interface Results {
-  [store: string]:
-    | {
-        title: string;
-        href: string;
-      }
-    | undefined;
+  [store: string]: {
+    title: string;
+    href: string;
+  }[];
 }
 
 const results: Results = {};
@@ -46,32 +46,10 @@ if (Astro.request.method === "POST") {
 <div><a href="/">Home</a></div>
 
 <h1>{BOOK_UPSTAIRS}</h1>
-{
-  results[BOOK_UPSTAIRS] ? (
-    <a href={results[BOOK_UPSTAIRS].href}>{results[BOOK_UPSTAIRS].title}</a>
-  ) : (
-    <div>Not found</div>
-  )
-}
+<Results results={results[BOOK_UPSTAIRS]} />
 
 <h1>{CHAPTERS}</h1>
-{
-  results[CHAPTERS] ? (
-    <a href={`https://chaptersbookstore.com${results[CHAPTERS].href}`}>
-      {results[CHAPTERS].title}
-    </a>
-  ) : (
-    <div>Not found</div>
-  )
-}
+<Results results={results[CHAPTERS]} />
 
 <h1>{COMPANY_OF_BOOKS}</h1>
-{
-  results[COMPANY_OF_BOOKS] ? (
-    <a href={`https://thecompanyofbooks.ie${results[COMPANY_OF_BOOKS].href}`}>
-      {results[COMPANY_OF_BOOKS].title}
-    </a>
-  ) : (
-    <div>Not found</div>
-  )
-}
+<Results results={results[COMPANY_OF_BOOKS]} />

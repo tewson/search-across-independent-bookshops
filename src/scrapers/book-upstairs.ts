@@ -3,26 +3,22 @@ import type { Page } from "puppeteer";
 export default async function bookUpstairs(page: Page, searchQuery: string) {
   await page.goto(`https://booksupstairs.ie/?s=${searchQuery}`);
 
-  const productTitleElement = await page.$(
-    ".book_row_container .book_row_details_container .h5",
+  const results = await page.$$eval(
+    ".book_row_container",
+    (bookRowContainers) => {
+      return bookRowContainers
+        .map((bookRowContainer) => {
+          const title =
+            bookRowContainer.querySelector(".book_row_details_container .h5")
+              ?.textContent ?? "";
+          const href =
+            bookRowContainer.querySelector("a")?.getAttribute("href") ?? "";
+          return { title, href };
+        })
+        .filter((rawResult) => rawResult.title && rawResult.href)
+        .slice(0, 10);
+    },
   );
 
-  const productTitle =
-    (await productTitleElement?.evaluate((el) => el.textContent)) ?? "";
-
-  const productLinkElement = await page.$(".book_row_container a");
-
-  const productLinkHref =
-    (await productLinkElement?.evaluate(
-      (el) => el.attributes.getNamedItem("href")?.value,
-    )) ?? "";
-
-  if (!productTitle || !productLinkHref) {
-    return undefined;
-  }
-
-  return {
-    title: productTitle,
-    href: productLinkHref,
-  };
+  return results;
 }
